@@ -1,0 +1,23 @@
+/*for second window*/
+/*
+makes the background look like the file .jpg (should be in the same place as .css
+*/
+.root {
+    -fx-background-image: url("background.jpg");
+}
+
+/*
+Style for button
+*/
+.button {
+    -fx-text-fill: white;
+    -fx-font-family: "Arial Narrow";
+    -fx-font-weight: bold;
+    -fx-background-color: #12b2df;
+    -fx-effect: dropshadow( three-pass-box , rgba(0,0,0,0.6) , 5, 0.0 , 0 , 1 );
+}
+
+root { 
+    display: block;
+}
+
