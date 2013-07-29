@@ -6,7 +6,6 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
-import java.util.Scanner;
 
 public class Client implements Runnable {
 
@@ -14,18 +13,20 @@ public class Client implements Runnable {
     private Thread thread = null;
     private DataInputStream console = null;
     private DataOutputStream streamOut = null;
-    private ClientThread clientThread = null;
+    public ClientThread clientThread = null;
     private String nick;
-    private String message = "empty";
+    public String message = "empty";
     private boolean finish = false;
+    private ClientFx clientfx;
 
-    public Client(int serverPort, String user) {
+    public Client(int serverPort, String user, ClientFx _clientfx) {
         System.out.println("Establishing connection. Please wait ...");
         try {
             InetAddress adress = InetAddress.getLocalHost();
             socket = new Socket(adress, serverPort);
             System.out.println("Connected: " + socket);
             nick = user;
+            clientfx = _clientfx;
             start();
         } catch (UnknownHostException uhe) {
             System.err.println("Host unknown: " + uhe.getMessage());
@@ -40,40 +41,13 @@ public class Client implements Runnable {
 
     @Override
     public void run() {
-        Scanner scanner = new Scanner(System.in);
-        while ((thread != null) && (finish == false)) {
-            try {
-                if (!message.contains(".bye")) {
-                    message = scanner.nextLine();
-                    streamOut.writeUTF(nick + ": " + message);
-                    streamOut.flush();
-                } else if (message.contains(".bye")) {
-                    finish = true;
-                }
-            } catch (IOException ioe) {
-                System.err.println("Sending error: " + ioe.getMessage());
-                stop();
-            }
-        }
-    }
-
-    public void handle(String msg) {
-        if (msg.equals(".bye")) {
-            System.out.println("Good bye...");
-            clientThread.finish();
-            finish = true;
-        } else {
-            System.out.println(msg);
-        }
     }
 
     public void start() throws IOException {
         console = new DataInputStream(System.in);
         streamOut = new DataOutputStream(socket.getOutputStream());
         if (thread == null) {
-            clientThread = new ClientThread(this, socket);
-            thread = new Thread(this);
-            thread.start();
+            clientThread = new ClientThread(this, socket, clientfx);
         }
     }
 
@@ -96,5 +70,19 @@ public class Client implements Runnable {
             System.err.println("Error closing ...");
         }
         clientThread.close();
+    }
+
+    public void send(String newmessage) {
+        try {
+            streamOut.writeUTF(nick + ": " + newmessage);
+            streamOut.flush();
+        } catch (IOException ioe) {
+            System.err.println("Sending error: " + ioe.getMessage());
+            stop();
+        }
+    }
+
+    public void receive(String newmessage) {
+        
     }
 }

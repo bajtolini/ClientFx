@@ -10,11 +10,13 @@ public class ClientThread extends Thread {
     private Socket socket = null;
     private Client client = null;
     private DataInputStream streamIn = null;
+    private ClientFx clientfx;
 
-    public ClientThread(Client _client, Socket _socket) {
+    public ClientThread(Client _client, Socket _socket, ClientFx _clientfx) {
         this.stop = false;
         client = _client;
         socket = _socket;
+        clientfx = _clientfx;
         open();
         start();
     }
@@ -42,7 +44,7 @@ public class ClientThread extends Thread {
     public void run() {
         while (!this.stop) {
             try {
-                client.handle(streamIn.readUTF());
+                clientfx.myTextAreaAppend(streamIn.readUTF());
             } catch (IOException ioe) {
                 if (!this.stop) {
                     System.err.println("Listening error: " + ioe.getMessage());

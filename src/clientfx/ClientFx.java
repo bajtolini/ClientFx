@@ -3,6 +3,7 @@ package clientfx;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
@@ -10,8 +11,10 @@ import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-import javafx.scene.control.PasswordField;
+import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.text.Text;
@@ -22,6 +25,8 @@ public class ClientFx extends Application {
     private String user;
     private String port;
     private int portDigit;
+    private Client client = null;
+    private TextArea log;
 
     @Override
     public void start(final Stage primaryStage) {
@@ -37,10 +42,10 @@ public class ClientFx extends Application {
 
         grid.add(scenetitle, 0, 0, 2, 1);
 
-        final Label userName = new Label("User Name:");
+        Label userName = new Label("User Name:");
         grid.add(userName, 0, 1);
 
-        TextField userTextField = new TextField();
+        final TextField userTextField = new TextField();
         grid.add(userTextField, 1, 1);
 
         Label pw = new Label("Port:");
@@ -61,7 +66,7 @@ public class ClientFx extends Application {
         btn.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent e) {
-                user = userName.getText();
+                user = userTextField.getText();
 
                 port = pBox.getText();
                 Pattern p = Pattern.compile("\\d*");
@@ -72,7 +77,8 @@ public class ClientFx extends Application {
 
                 actiontarget.setId("actiontarget");
                 actiontarget.setText("Connecting...");
-                Client client = new Client(portDigit, user);
+                
+                client = new Client(portDigit, user, ClientFx.this);
 
                 primaryStage.hide();
                 Stage secondaryStage = new Stage();
@@ -81,12 +87,17 @@ public class ClientFx extends Application {
                 sgrid.setAlignment(Pos.CENTER);
                 sgrid.setPadding(new Insets(75, 75, 75, 75));
 
-                Label log = new Label();
+                log = new TextArea();
                 log.setMinSize(450, 680);
+                log.setFocusTraversable(false);
+                log.setEditable(false);
+                
                 sgrid.add(log, 0, 0);
 
-                TextField userMessage = new TextField();
+                final TextField userMessage = new TextField();
                 sgrid.add(userMessage, 0, 1);
+
+
 
                 Button sendBtn = new Button("Send");
                 HBox sendHBtn = new HBox(10);
@@ -96,10 +107,20 @@ public class ClientFx extends Application {
                 sendBtn.setOnAction(new EventHandler<ActionEvent>() {
                     @Override
                     public void handle(ActionEvent e) {
-                        //code for sending message
+                        client.send(userMessage.getText());
+                        userMessage.clear();
                     }
                 });
-                
+                log.setOnKeyPressed(new EventHandler<KeyEvent>() {
+                    @Override
+                    public void handle(KeyEvent t) {
+                        if (t.getCode() == KeyCode.ENTER) {
+                            client.send(userMessage.getText());
+                            userMessage.clear();
+                        }
+                    }
+                });
+
                 Button exitBtn = new Button("Exit");
                 HBox exitHBtn = new HBox(10);
                 exitHBtn.setAlignment(Pos.BOTTOM_RIGHT);
@@ -108,11 +129,17 @@ public class ClientFx extends Application {
                 exitBtn.setOnAction(new EventHandler<ActionEvent>() {
                     @Override
                     public void handle(ActionEvent e) {
-                        //code for exiting + need to erase exit with command .bye
+                        client.stop();
+                        Platform.exit();
+                        //receiving message
                     }
                 });
 
-                sgrid.setGridLinesVisible(true);
+                //if (client.messagereceived) {
+                //    log.appendText((String)client.rmessage + "\n");
+                //}
+
+                //sgrid.setGridLinesVisible(true);
                 Scene scene = new Scene(sgrid);
                 secondaryStage.setScene(scene);
                 scene.getStylesheets().add(ClientFx.class.getResource("Chat.css").toExternalForm());
@@ -128,5 +155,9 @@ public class ClientFx extends Application {
 
     public static void main(String[] args) {
         launch(args);
+    }
+
+    public void myTextAreaAppend(String text) {
+        log.appendText(text + "\n");
     }
 }
