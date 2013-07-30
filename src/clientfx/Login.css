@@ -1,15 +1,11 @@
 /*for first window*/
-/*
-makes the background look like the file .jpg (should be in the same place as .css
-*/
+/* makes the background look like the file .jpg (should be in the same place as .css */
 .root {
     -fx-background-image: url("background.jpg");
 }
 
 
-/*
-makes all fonts in panel look like this description below
-*/
+/* makes all fonts in panel look like this description below */
 .label {
     -fx-font-size: 12px;
     -fx-font-weight: bold;
@@ -18,9 +14,7 @@ makes all fonts in panel look like this description below
 }
 
 
-/*
-sets described style to the ID's wich were created in the Login class
-*/
+/* sets described style to the ID's wich were created in the Login class */
 #welcome-text {
    -fx-font-size: 32px;
    -fx-font-family: "Arial Black";
@@ -35,9 +29,7 @@ sets described style to the ID's wich were created in the Login class
 }
 
 
-/*
-Style for button
-*/
+/* Style for button */
 .button {
     -fx-text-fill: white;
     -fx-font-family: "Arial Narrow";
@@ -46,9 +38,7 @@ Style for button
     -fx-effect: dropshadow( three-pass-box , rgba(0,0,0,0.6) , 5, 0.0 , 0 , 1 );
 }
 
-/*
-hovering button function
-*/
+/* hovering button function */
 .button:hover {
     -fx-background-color: linear-gradient(#2A5058, #61a2b1);
 }

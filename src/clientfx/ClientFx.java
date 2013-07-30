@@ -19,6 +19,7 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
+import javafx.stage.WindowEvent;
 
 public class ClientFx extends Application {
 
@@ -31,7 +32,7 @@ public class ClientFx extends Application {
     @Override
     public void start(final Stage primaryStage) {
         primaryStage.setTitle("Welcome");
-        GridPane grid = new GridPane();
+        final GridPane grid = new GridPane();
         grid.setAlignment(Pos.CENTER);
         grid.setHgap(10);
         grid.setVgap(10);
@@ -61,89 +62,106 @@ public class ClientFx extends Application {
         grid.add(hbBtn, 1, 4);
 
         final Text actiontarget = new Text();
-        grid.add(actiontarget, 1, 6);
+        actiontarget.setId("actiontarget");
 
         btn.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent e) {
-                user = userTextField.getText();
+                if (!(userTextField.getText().isEmpty()) && (!pBox.getText().isEmpty())) {
+                    user = userTextField.getText();
 
-                port = pBox.getText();
-                Pattern p = Pattern.compile("\\d*");
-                Matcher m = p.matcher(port);
-                if (m.find()) {
-                    portDigit = Integer.parseInt(m.group(0));
-                }
-
-                actiontarget.setId("actiontarget");
-                actiontarget.setText("Connecting...");
-                
-                client = new Client(portDigit, user, ClientFx.this);
-
-                primaryStage.hide();
-                Stage secondaryStage = new Stage();
-                secondaryStage.setTitle("Chat");
-                GridPane sgrid = new GridPane();
-                sgrid.setAlignment(Pos.CENTER);
-                sgrid.setPadding(new Insets(75, 75, 75, 75));
-
-                log = new TextArea();
-                log.setMinSize(450, 680);
-                log.setFocusTraversable(false);
-                log.setEditable(false);
-                
-                sgrid.add(log, 0, 0);
-
-                final TextField userMessage = new TextField();
-                sgrid.add(userMessage, 0, 1);
-
-
-
-                Button sendBtn = new Button("Send");
-                HBox sendHBtn = new HBox(10);
-                sendHBtn.setAlignment(Pos.BOTTOM_RIGHT);
-                sendHBtn.getChildren().add(sendBtn);
-                sgrid.add(sendHBtn, 1, 1);
-                sendBtn.setOnAction(new EventHandler<ActionEvent>() {
-                    @Override
-                    public void handle(ActionEvent e) {
-                        client.send(userMessage.getText());
-                        userMessage.clear();
+                    port = pBox.getText();
+                    Pattern p = Pattern.compile("\\d*");
+                    Matcher m = p.matcher(port);
+                    if (m.find()) {
+                        portDigit = Integer.parseInt(m.group(0));
                     }
-                });
-                log.setOnKeyPressed(new EventHandler<KeyEvent>() {
-                    @Override
-                    public void handle(KeyEvent t) {
-                        if (t.getCode() == KeyCode.ENTER) {
-                            client.send(userMessage.getText());
-                            userMessage.clear();
+
+                    if (grid.getChildren().contains(actiontarget)) {
+                        grid.getChildren().remove(actiontarget);
+                    }
+                    actiontarget.setText("Connecting...");
+                    grid.add(actiontarget, 0, 4);
+
+                    client = new Client(portDigit, user, ClientFx.this);
+
+                    primaryStage.hide();
+                    Stage secondaryStage = new Stage();
+                    secondaryStage.setTitle("Chat");
+                    GridPane sgrid = new GridPane();
+                    sgrid.setAlignment(Pos.CENTER);
+                    sgrid.setPadding(new Insets(75, 75, 75, 75));
+
+                    log = new TextArea();
+                    log.setMinSize(450, 680);
+                    log.setFocusTraversable(false);
+                    log.setEditable(false);
+                    sgrid.add(log, 0, 0);
+
+                    final TextField userMessage = new TextField();
+                    userMessage.setMinWidth(400);
+                    Button sendBtn = new Button("Send");
+                    Button exitBtn = new Button("Exit");
+                    HBox chatBtns = new HBox();
+                    chatBtns.setSpacing(0);
+                    chatBtns.getChildren().addAll(userMessage, sendBtn, exitBtn);
+                    sgrid.add(chatBtns, 0, 1);
+
+                    sendBtn.setOnAction(new EventHandler<ActionEvent>() {
+                        @Override
+                        public void handle(ActionEvent e) {
+                            if (!(userMessage.getText().isEmpty())) {
+                                client.send(userMessage.getText());
+                                userMessage.clear();
+                            }
                         }
+                    });
+                    sgrid.setOnKeyPressed(new EventHandler<KeyEvent>() {
+                        @Override
+                        public void handle(KeyEvent t) {
+                            if ((t.getCode() == KeyCode.ENTER) && !(userMessage.getText().isEmpty())) {
+                                client.send(userMessage.getText());
+                                userMessage.clear();
+                            }
+                        }
+                    });
+
+                    exitBtn.setOnAction(new EventHandler<ActionEvent>() {
+                        @Override
+                        public void handle(ActionEvent e) {
+                            client.stop();
+                            Platform.exit();
+                        }
+                    });
+
+                    Scene scene = new Scene(sgrid);
+                    secondaryStage.setScene(scene);
+                    scene.getStylesheets().add(ClientFx.class.getResource("Chat.css").toExternalForm());
+                    secondaryStage.show();
+
+                    //TODO: sprobowac napisac 2 deklaracja button-ow w jednym .css
+
+                    secondaryStage.setOnCloseRequest((new EventHandler<WindowEvent>() {
+                        @Override
+                        public void handle(WindowEvent we) {
+                            client.stop();
+                            Platform.exit();
+                        }
+                    }));
+
+                } else if (userTextField.getText().isEmpty()) {
+                    if (grid.getChildren().contains(actiontarget)) {
+                        grid.getChildren().remove(actiontarget);
                     }
-                });
-
-                Button exitBtn = new Button("Exit");
-                HBox exitHBtn = new HBox(10);
-                exitHBtn.setAlignment(Pos.BOTTOM_RIGHT);
-                exitHBtn.getChildren().add(exitBtn);
-                sgrid.add(exitHBtn, 2, 1);
-                exitBtn.setOnAction(new EventHandler<ActionEvent>() {
-                    @Override
-                    public void handle(ActionEvent e) {
-                        client.stop();
-                        Platform.exit();
-                        //receiving message
+                    actiontarget.setText("Write User Name");
+                    grid.add(actiontarget, 0, 4);
+                } else if (pBox.getText().isEmpty()) {
+                    if (grid.getChildren().contains(actiontarget)) {
+                        grid.getChildren().remove(actiontarget);
                     }
-                });
-
-                //if (client.messagereceived) {
-                //    log.appendText((String)client.rmessage + "\n");
-                //}
-
-                //sgrid.setGridLinesVisible(true);
-                Scene scene = new Scene(sgrid);
-                secondaryStage.setScene(scene);
-                scene.getStylesheets().add(ClientFx.class.getResource("Chat.css").toExternalForm());
-                secondaryStage.show();
+                    actiontarget.setText("Write port");
+                    grid.add(actiontarget, 0, 4);
+                }
             }
         });
 
@@ -153,11 +171,11 @@ public class ClientFx extends Application {
         primaryStage.show();
     }
 
-    public static void main(String[] args) {
-        launch(args);
-    }
-
     public void myTextAreaAppend(String text) {
         log.appendText(text + "\n");
+    }
+
+    public static void main(String[] args) {
+        launch(args);
     }
 }

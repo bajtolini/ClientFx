@@ -13,9 +13,8 @@ public class Client implements Runnable {
     private Thread thread = null;
     private DataInputStream console = null;
     private DataOutputStream streamOut = null;
-    public ClientThread clientThread = null;
+    private ClientThread clientThread = null;
     private String nick;
-    public String message = "empty";
     private boolean finish = false;
     private ClientFx clientfx;
 
@@ -35,10 +34,6 @@ public class Client implements Runnable {
         }
     }
 
-    Client() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
     @Override
     public void run() {
     }
@@ -52,6 +47,7 @@ public class Client implements Runnable {
     }
 
     public void stop() {
+        clientThread.finish();
         if (thread != null) {
             thread.interrupt();
             thread = null;
@@ -80,9 +76,5 @@ public class Client implements Runnable {
             System.err.println("Sending error: " + ioe.getMessage());
             stop();
         }
-    }
-
-    public void receive(String newmessage) {
-        
     }
 }
