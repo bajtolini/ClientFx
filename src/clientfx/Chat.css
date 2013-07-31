@@ -4,8 +4,8 @@
     -fx-background-image: url("background2.jpg");
 }
 
-/* Style for button */
-.button {
+/* Style for sendBtn */
+#sendingButton {
     -fx-text-fill: white;
     -fx-font-family: "Arial Narrow";
     -fx-font-weight: bold;
@@ -13,8 +13,8 @@
     -fx-effect: dropshadow( three-pass-box , rgba(0,0,0,0.6) , 5, 0.0 , 0 , 1 );
 }
 
-/* TODO: nie dziala (nie wiem jak zadeklarowac) */
-.exitBtn {
+/* Style for exitBtn */
+#exitingButton {
     -fx-text-fill: white;
     -fx-font-family: "Arial Narrow";
     -fx-font-weight: bold;

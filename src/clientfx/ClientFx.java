@@ -101,7 +101,9 @@ public class ClientFx extends Application {
                     final TextField userMessage = new TextField();
                     userMessage.setMinWidth(400);
                     Button sendBtn = new Button("Send");
+                    sendBtn.setId("sendingButton");
                     Button exitBtn = new Button("Exit");
+                    exitBtn.setId("exitingButton");
                     HBox chatBtns = new HBox();
                     chatBtns.setSpacing(0);
                     chatBtns.getChildren().addAll(userMessage, sendBtn, exitBtn);
@@ -138,8 +140,6 @@ public class ClientFx extends Application {
                     secondaryStage.setScene(scene);
                     scene.getStylesheets().add(ClientFx.class.getResource("Chat.css").toExternalForm());
                     secondaryStage.show();
-
-                    //TODO: sprobowac napisac 2 deklaracja button-ow w jednym .css
 
                     secondaryStage.setOnCloseRequest((new EventHandler<WindowEvent>() {
                         @Override
