@@ -12,11 +12,11 @@ public class ClientThread extends Thread {
     private DataInputStream streamIn = null;
     private ClientFx clientfx;
 
-    public ClientThread(Client _client, Socket _socket, ClientFx _clientfx) {
+    public ClientThread(Client client, Socket socket, ClientFx clientfx) {
         this.stop = false;
-        client = _client;
-        socket = _socket;
-        clientfx = _clientfx;
+        this.client = client;
+        this.socket = socket;
+        this.clientfx = clientfx;
         open();
         start();
     }

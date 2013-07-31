@@ -18,14 +18,14 @@ public class Client implements Runnable {
     private boolean finish = false;
     private ClientFx clientfx;
 
-    public Client(int serverPort, String user, ClientFx _clientfx) {
+    public Client(int serverPort, String user, ClientFx clientfx) {
         System.out.println("Establishing connection. Please wait ...");
         try {
             InetAddress adress = InetAddress.getLocalHost();
             socket = new Socket(adress, serverPort);
             System.out.println("Connected: " + socket);
             nick = user;
-            clientfx = _clientfx;
+            this.clientfx = clientfx;
             start();
         } catch (UnknownHostException uhe) {
             System.err.println("Host unknown: " + uhe.getMessage());
