@@ -1,7 +1,9 @@
 package clientfx;
 
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.io.IOException;
+import java.net.InetAddress;
+import java.net.Socket;
+import java.net.UnknownHostException;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
@@ -28,6 +30,7 @@ public class ClientFx extends Application {
     private int portDigit;
     private Client client = null;
     private TextArea log;
+    private Socket socket = null;
 
     @Override
     public void start(final Stage primaryStage) {
@@ -67,23 +70,42 @@ public class ClientFx extends Application {
         btn.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent e) {
-                if (!(userTextField.getText().isEmpty()) && (!pBox.getText().isEmpty())) {
-                    user = userTextField.getText();
-
-                    port = pBox.getText();
-                    Pattern p = Pattern.compile("\\d*");
-                    Matcher m = p.matcher(port);
-                    if (m.find()) {
-                        portDigit = Integer.parseInt(m.group(0));
+                port = pBox.getText();
+                boolean keepGoing = false;
+                try {
+                    portDigit = Integer.parseInt(port);
+                    try {
+                        if ((!userTextField.getText().isEmpty()) && (!pBox.getText().isEmpty())) {
+                            InetAddress adress = InetAddress.getLocalHost();
+                            socket = new Socket(adress, portDigit);
+                            keepGoing = true;
+                        }
+                    } catch (UnknownHostException uhe) {
+                        if (grid.getChildren().contains(actiontarget)) {
+                            grid.getChildren().remove(actiontarget);
+                        }
+                        actiontarget.setText("Server isnt at this port");
+                        grid.add(actiontarget, 0, 4);
+                        keepGoing = false;
+                    } catch (IOException ioe) {
+                        if (grid.getChildren().contains(actiontarget)) {
+                            grid.getChildren().remove(actiontarget);
+                        }
+                        actiontarget.setText("Type correct port");
+                        grid.add(actiontarget, 0, 4);
+                        keepGoing = false;
                     }
-
+                } catch (NumberFormatException x) {
                     if (grid.getChildren().contains(actiontarget)) {
                         grid.getChildren().remove(actiontarget);
                     }
-                    actiontarget.setText("Connecting...");
+                    actiontarget.setText("Port must be a number");
                     grid.add(actiontarget, 0, 4);
+                }
+                if ((!userTextField.getText().isEmpty()) && (!pBox.getText().isEmpty()) && (keepGoing)) {
+                    user = userTextField.getText();
 
-                    client = new Client(portDigit, user, ClientFx.this);
+                    client = new Client(socket, user, ClientFx.this);
 
                     primaryStage.hide();
                     Stage secondaryStage = new Stage();

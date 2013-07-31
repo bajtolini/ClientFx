@@ -3,9 +3,7 @@ package clientfx;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
-import java.net.InetAddress;
 import java.net.Socket;
-import java.net.UnknownHostException;
 
 public class Client implements Runnable {
 
@@ -18,17 +16,14 @@ public class Client implements Runnable {
     private boolean finish = false;
     private ClientFx clientfx;
 
-    public Client(int serverPort, String user, ClientFx clientfx) {
+    public Client(Socket socket, String user, ClientFx clientfx) {
         System.out.println("Establishing connection. Please wait ...");
         try {
-            InetAddress adress = InetAddress.getLocalHost();
-            socket = new Socket(adress, serverPort);
+            this.socket = socket;
             System.out.println("Connected: " + socket);
             nick = user;
             this.clientfx = clientfx;
             start();
-        } catch (UnknownHostException uhe) {
-            System.err.println("Host unknown: " + uhe.getMessage());
         } catch (IOException ioe) {
             System.err.println("Unexpected exception: " + ioe.getMessage());
         }
